@@ -6,9 +6,9 @@ ENT.PrintName = "SCP 019"
 ENT.Category = "Vechniy SCP"
 ENT.Spawnable = true
 
-CreateConVar("scp019_maxheadcrabs", 10, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Максимальное количество хедкрабов возле SCP-019")
-CreateConVar("scp019_autospawn", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Включить автоспавн (0/1)")
-CreateConVar("scp019_autospawn_interval", 20, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Интервал автоспавна в секундах")
+CreateConVar("scp019_maxheadcrabs", 10, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Max Headcrabs")
+CreateConVar("scp019_autospawn", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Autospawn (0/1)")
+CreateConVar("scp019_autospawn_interval", 20, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Interval AutoSpawn (сек)")
 
 function ENT:Initialize()
     self:SetModel("/models/SCP_019.mdl")
@@ -34,9 +34,9 @@ function ENT:SpawnHeadcrab()
     if self.HeadcrabCount >= GetConVar("scp019_maxheadcrabs"):GetInt() then return end
 
     local choices = {
-        {class = "npc_headcrab", chance = 70, sound = "npc/headcrab/alert1.wav"},
-        {class = "npc_headcrab_fast", chance = 20, sound = "npc/headcrab_fast/alert1.wav"},
-        {class = "npc_headcrab_black", chance = 10, sound = "npc/headcrab_poison/ph_wallpain2.wav"}
+        {class = "npc_headcrab", chance = 60, sound = "ambient/levels/canals/headcrab_canister_ambient2.wav"},
+        {class = "npc_headcrab_fast", chance = 20, sound = "ambient/levels/canals/headcrab_canister_ambient2.wav"},
+        {class = "npc_headcrab_black", chance = 20, sound = "ambient/levels/canals/headcrab_canister_ambient2.wav"}
     }
 
     local roll = math.random(1, 100)
@@ -50,7 +50,10 @@ function ENT:SpawnHeadcrab()
         end
     end
 
+
     local spawnPos = self:GetPos() + Vector(math.random(-100, 100), math.random(-100, 100), 20)
+
+
     local headcrab = ents.Create(selected.class)
     if not IsValid(headcrab) then return end
     headcrab:SetPos(spawnPos)
@@ -63,9 +66,9 @@ function ENT:SpawnHeadcrab()
 
     local effectData = EffectData()
     effectData:SetOrigin(spawnPos)
-    util.Effect("Dust", effectData, true, true)
+    util.Effect("ElectricSpark", effectData, true, true)
 
-    self:EmitSound(selected.sound, 75, 100, 1, CHAN_AUTO)
+    headcrab:EmitSound(selected.sound)
 
     table.insert(self.HeadcrabEntities, headcrab)
     self.HeadcrabCount = self.HeadcrabCount + 1
@@ -79,6 +82,7 @@ function ENT:SpawnHeadcrab()
         end
         self.HeadcrabCount = math.max(0, self.HeadcrabCount - 1)
     end)
+
 end
 
 function ENT:Use(activator, caller)
@@ -95,7 +99,7 @@ function ENT:Think()
             self.NextSpawnTime = CurTime() + GetConVar("scp019_autospawn_interval"):GetInt()
         end
     end
-    self:NextThink(CurTime() + 1) 
+    self:NextThink(CurTime() + 1)
     return true
 end
 
